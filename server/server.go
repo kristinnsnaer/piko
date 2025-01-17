@@ -19,6 +19,7 @@ import (
 	"github.com/andydunstall/piko/server/admin"
 	"github.com/andydunstall/piko/server/cluster"
 	"github.com/andydunstall/piko/server/config"
+	"github.com/andydunstall/piko/server/dbmanager"
 	"github.com/andydunstall/piko/server/gossip"
 	"github.com/andydunstall/piko/server/proxy"
 	"github.com/andydunstall/piko/server/upstream"
@@ -58,6 +59,8 @@ type Server struct {
 	registry *prometheus.Registry
 
 	logger log.Logger
+
+	dbManager *dbmanager.DBManager
 }
 
 // NewServer creates a server node with the given configuration.
@@ -69,13 +72,15 @@ func NewServer(conf *config.Config, logger log.Logger) (*Server, error) {
 
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(collectors.NewGoCollector())
+	dbManager := dbmanager.NewDBManager()
 
 	s := &Server{
-		fatalCh:  make(chan struct{}),
-		shutdown: atomic.NewBool(false),
-		conf:     conf,
-		registry: registry,
-		logger:   logger,
+		fatalCh:   make(chan struct{}),
+		shutdown:  atomic.NewBool(false),
+		conf:      conf,
+		registry:  registry,
+		logger:    logger,
+		dbManager: dbManager,
 	}
 
 	// Proxy listener.
@@ -135,6 +140,7 @@ func NewServer(conf *config.Config, logger log.Logger) (*Server, error) {
 		proxyVerifier,
 		proxyTLSConfig,
 		logger,
+		s.dbManager,
 	)
 
 	// Upstream server.
@@ -156,6 +162,7 @@ func NewServer(conf *config.Config, logger log.Logger) (*Server, error) {
 		upstreamVerifier,
 		upstreamTLSConfig,
 		logger,
+		s.dbManager,
 	)
 
 	// Admin server.
@@ -178,6 +185,7 @@ func NewServer(conf *config.Config, logger log.Logger) (*Server, error) {
 		adminVerifier,
 		adminTLSConfig,
 		logger,
+		s.dbManager,
 	)
 	s.adminServer.AddStatus("/upstream", upstream.NewStatus(upstreams))
 	s.adminServer.AddStatus("/cluster", cluster.NewStatus(s.clusterState))

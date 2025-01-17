@@ -18,6 +18,7 @@ import (
 	"github.com/andydunstall/piko/pkg/log"
 	"github.com/andydunstall/piko/pkg/middleware"
 	pikowebsocket "github.com/andydunstall/piko/pkg/websocket"
+	"github.com/andydunstall/piko/server/dbmanager"
 )
 
 // Server accepts connections from upstream services.
@@ -32,6 +33,8 @@ type Server struct {
 	cancel func()
 
 	logger log.Logger
+
+	dbManager *dbmanager.DBManager
 }
 
 func NewServer(
@@ -39,6 +42,7 @@ func NewServer(
 	verifier auth.Verifier,
 	tlsConfig *tls.Config,
 	logger log.Logger,
+	dbManager *dbmanager.DBManager,
 ) *Server {
 	logger = logger.WithSubsystem("upstream")
 
@@ -55,6 +59,7 @@ func NewServer(
 		ctx:               ctx,
 		cancel:            cancel,
 		logger:            logger,
+		dbManager:         dbManager,
 	}
 
 	// Recover from panics.
@@ -101,6 +106,30 @@ func (s *Server) Shutdown(ctx context.Context) error {
 // upstreamRoute handles WebSocket connections from upstream services.
 func (s *Server) upstreamRoute(c *gin.Context) {
 	endpointID := c.Param("endpointID")
+
+	tunnel, err := s.dbManager.TunnelManager.GetTunnelFromEndpointID(endpointID)
+	if err != nil {
+		s.logger.Error("Tunnel not found with endpoint ID", zap.String("endpoint_id", endpointID))
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"error": fmt.Sprintf("Tunnel not found with endpoint ID '%s'", endpointID),
+			},
+		)
+		return
+	}
+
+	if tunnel.UpstreamToken != "" {
+		// Verify the token is permitted to access the target endpoint.
+		token := c.Request.Header.Get("x-upstream-token")
+
+		if token != tunnel.UpstreamToken {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "invalid upstream token",
+			})
+			return
+		}
+	}
 
 	token, ok := c.Get(middleware.TokenContextKey)
 	if ok {

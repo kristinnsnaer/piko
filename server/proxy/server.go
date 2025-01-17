@@ -17,6 +17,7 @@ import (
 	"github.com/andydunstall/piko/pkg/log"
 	"github.com/andydunstall/piko/pkg/middleware"
 	"github.com/andydunstall/piko/server/config"
+	"github.com/andydunstall/piko/server/dbmanager"
 	"github.com/andydunstall/piko/server/upstream"
 )
 
@@ -27,6 +28,8 @@ type Server struct {
 	httpServer *http.Server
 
 	logger log.Logger
+
+	dbManager *dbmanager.DBManager
 }
 
 func NewServer(
@@ -36,6 +39,7 @@ func NewServer(
 	verifier auth.Verifier,
 	tlsConfig *tls.Config,
 	logger log.Logger,
+	dbManager *dbmanager.DBManager,
 ) *Server {
 	logger = logger.WithSubsystem("proxy")
 
@@ -55,7 +59,8 @@ func NewServer(
 			MaxHeaderBytes:    proxyConfig.HTTP.MaxHeaderBytes,
 			ErrorLog:          logger.StdLogger(zapcore.WarnLevel),
 		},
-		logger: logger,
+		logger:    logger,
+		dbManager: dbManager,
 	}
 
 	// Recover from panics.
@@ -125,8 +130,33 @@ func (s *Server) proxyHTTPRoute(c *gin.Context) {
 		return
 	}
 
-	// Verify the token is permitted to access the target endpoint.
+	// TODO: Verify tunnels access token
+	tunnel, err := s.dbManager.TunnelManager.GetTunnelFromEndpointID(endpointID)
+	if err != nil {
+		s.logger.Error("tunnel not found", zap.String("endpoint_id", endpointID))
+		c.JSON(
+			http.StatusNotFound,
+			gin.H{
+				"error": fmt.Sprintf("tunnel not found with endpoint ID '%s'", endpointID),
+			},
+		)
+		return
+	}
+
+	if tunnel.ProxyToken != "" {
+		// Verify the token is permitted to access the target endpoint.
+		token := c.Request.Header.Get("x-proxy-token")
+
+		if token != tunnel.ProxyToken {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "invalid proxy token",
+			})
+			return
+		}
+	}
+
 	token, ok := c.Get(middleware.TokenContextKey)
+	// Verify the token is permitted to access the target endpoint.
 	if ok {
 		// If the token contains a set of permitted endpoints, verify the
 		// target endpoint matches one of those endpoints. Otherwise if the

@@ -111,6 +111,7 @@ func Dial(ctx context.Context, url string, opts ...DialOption) (*Conn, error) {
 
 	header := make(http.Header)
 	if options.token != "" {
+		header.Set("x-upstream-token", options.token)
 		header.Set("Authorization", "Bearer "+options.token)
 	}
 

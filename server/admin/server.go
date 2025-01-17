@@ -19,6 +19,7 @@ import (
 	"github.com/andydunstall/piko/pkg/log"
 	"github.com/andydunstall/piko/pkg/middleware"
 	"github.com/andydunstall/piko/server/cluster"
+	"github.com/andydunstall/piko/server/dbmanager"
 	"github.com/andydunstall/piko/server/status"
 )
 
@@ -38,6 +39,8 @@ type Server struct {
 	router *gin.Engine
 
 	logger log.Logger
+
+	dbmanager *dbmanager.DBManager
 }
 
 func NewServer(
@@ -46,6 +49,7 @@ func NewServer(
 	verifier auth.Verifier,
 	tlsConfig *tls.Config,
 	logger log.Logger,
+	dbmanager *dbmanager.DBManager,
 ) *Server {
 	logger = logger.WithSubsystem("admin")
 
@@ -60,8 +64,9 @@ func NewServer(
 			TLSConfig: tlsConfig,
 			ErrorLog:  logger.StdLogger(zapcore.WarnLevel),
 		},
-		router: router,
-		logger: logger,
+		router:    router,
+		logger:    logger,
+		dbmanager: dbmanager,
 	}
 
 	// Recover from panics.
@@ -122,6 +127,8 @@ func (s *Server) registerRoutes(router *gin.Engine) {
 	if s.registry != nil {
 		router.GET("/metrics", s.metricsHandler())
 	}
+
+	s.RegisterAPIRoutes(s.router.Group("/api"))
 
 	// From https://github.com/gin-contrib/pprof/blob/934af36b21728278339704005bcef2eec1375091/pprof.go#L32.
 	pprofGroup := s.router.Group("/debug/pprof")

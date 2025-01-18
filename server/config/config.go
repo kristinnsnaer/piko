@@ -231,6 +231,8 @@ type AdminConfig struct {
 
 	Auth auth.Config `json:"auth" yaml:"auth"`
 
+	ApiAuthConfig auth.APIConfig `json:"api_auth" yaml:"api_auth"`
+
 	TLS TLSConfig `json:"tls" yaml:"tls"`
 }
 
@@ -271,6 +273,13 @@ By default, if the bind address includes an IP to bind to that will be used.
 If the bind address does not include an IP (such as ':8002') the nodes
 private IP will be used, such as a bind address of ':8002' may have an
 advertise address of '10.26.104.14:8002'.`,
+	)
+
+	fs.StringVar(
+		&c.ApiAuthConfig.Token,
+		"admin.api-auth-token",
+		c.ApiAuthConfig.Token,
+		`Token used to authenticate API requests.`,
 	)
 
 	c.Auth.RegisterFlags(fs, "admin")

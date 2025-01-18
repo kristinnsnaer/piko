@@ -50,6 +50,10 @@ type LoadedConfig struct {
 	DisableDisconnectOnExpiry bool
 }
 
+type APIConfig struct {
+	Token string `json:"token" yaml:"token"`
+}
+
 // Enabled returns whether authentication is enabled.
 //
 // It is enabled when at least one verification key is configured.
@@ -140,4 +144,8 @@ Disables disconnecting the client when their token expires.
 
 Piko still verifies the token expiry when the client first connects.`,
 	)
+}
+
+func (c *APIConfig) Enabled() bool {
+	return c.Token != ""
 }

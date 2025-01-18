@@ -176,6 +176,7 @@ func NewServer(conf *config.Config, logger log.Logger) (*Server, error) {
 		adminVerifier = auth.NewJWTVerifier(verifierConf)
 	}
 	adminTLSConfig, err := conf.Admin.TLS.Load()
+
 	if err != nil {
 		return nil, fmt.Errorf("admin tls: %w", err)
 	}
@@ -186,6 +187,7 @@ func NewServer(conf *config.Config, logger log.Logger) (*Server, error) {
 		adminTLSConfig,
 		logger,
 		s.dbManager,
+		conf.Admin.ApiAuthConfig,
 	)
 	s.adminServer.AddStatus("/upstream", upstream.NewStatus(upstreams))
 	s.adminServer.AddStatus("/cluster", cluster.NewStatus(s.clusterState))

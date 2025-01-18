@@ -41,6 +41,8 @@ type Server struct {
 	logger log.Logger
 
 	dbmanager *dbmanager.DBManager
+
+	apiAuthConfig auth.APIConfig
 }
 
 func NewServer(
@@ -50,6 +52,7 @@ func NewServer(
 	tlsConfig *tls.Config,
 	logger log.Logger,
 	dbmanager *dbmanager.DBManager,
+	apiAuthConfig auth.APIConfig,
 ) *Server {
 	logger = logger.WithSubsystem("admin")
 
@@ -64,9 +67,10 @@ func NewServer(
 			TLSConfig: tlsConfig,
 			ErrorLog:  logger.StdLogger(zapcore.WarnLevel),
 		},
-		router:    router,
-		logger:    logger,
-		dbmanager: dbmanager,
+		router:        router,
+		logger:        logger,
+		dbmanager:     dbmanager,
+		apiAuthConfig: apiAuthConfig,
 	}
 
 	// Recover from panics.

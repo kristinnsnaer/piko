@@ -1,0 +1,8 @@
+admin:
+  api_auth:
+    token: 1234
+database:
+  enabled: false
+  driver: sqlite
+  datasource:
+    dsn: 'test.db'

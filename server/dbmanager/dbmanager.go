@@ -69,7 +69,10 @@ func (d *DBManager) GetDB() *gorm.DB {
 }
 
 func (d *DBManager) Migrate() {
-	d.orm.AutoMigrate(&Tunnel{})
+	err := d.orm.AutoMigrate(&Tunnel{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (d *DBManager) Enabled() bool {

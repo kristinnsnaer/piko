@@ -287,6 +287,65 @@ advertise address of '10.26.104.14:8002'.`,
 	c.TLS.RegisterFlags(fs, "admin")
 }
 
+type DatabaseConfig struct {
+	Enabled          bool             `json:"enabled" yaml:"enabled"`
+	DriverName       string           `json:"driver" yaml:"driver"`
+	DatasourceConfig DatasourceConfig `json:"datasource" yaml:"datasource"`
+}
+
+type DatasourceConfig struct {
+	Dsn string `json:"dsn" yaml:"dsn"`
+}
+
+func (c *DatabaseConfig) Validate() error {
+	if !c.Enabled {
+		return nil
+	}
+
+	if c.DriverName == "" {
+		return fmt.Errorf("missing driver name")
+	}
+	switch c.DriverName {
+	case "sqlite":
+		if c.DatasourceConfig.Dsn == "" {
+			return fmt.Errorf("missing dsn")
+		}
+	default:
+		return fmt.Errorf("unsupported driver name")
+	}
+	return nil
+}
+
+func (c *DatabaseConfig) RegisterFlags(fs *pflag.FlagSet) {
+	fs.BoolVar(
+		&c.Enabled,
+		"database.enabled",
+		c.Enabled,
+		`
+Whether to enable the database.
+
+This enables the database and enables the admin API to manage tunnels.`,
+	)
+	fs.StringVar(
+		&c.DriverName,
+		"database.driver",
+		c.DriverName,
+		`
+The database driver name.
+
+If the driver name is 'sqlite', then the 'data_source' must be set.`,
+	)
+	fs.StringVar(
+		&c.DatasourceConfig.Dsn,
+		"database.datasource.dsn",
+		c.DatasourceConfig.Dsn,
+		`
+The database connection string.
+
+Required if the driver name is 'sqlite'.`,
+	)
+}
+
 type ClusterConfig struct {
 	// NodeID is a unique identifier for this node in the cluster.
 	NodeID string `json:"node_id" yaml:"node_id"`
@@ -419,6 +478,8 @@ type Config struct {
 
 	Log log.Config `json:"log" yaml:"log"`
 
+	Database DatabaseConfig `json:"database" yaml:"database"`
+
 	// GracePeriod is the duration to gracefully shutdown the server. During
 	// the grace period, listeners and idle connections are closed, then waits
 	// for active requests to complete and closes their connections.
@@ -482,6 +543,10 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("log: %w", err)
 	}
 
+	if err := c.Database.Validate(); err != nil {
+		return fmt.Errorf("database: %w", err)
+	}
+
 	if c.GracePeriod == 0 {
 		return fmt.Errorf("missing grace period")
 	}
@@ -501,6 +566,8 @@ func (c *Config) RegisterFlags(fs *pflag.FlagSet) {
 	c.Usage.RegisterFlags(fs)
 
 	c.Log.RegisterFlags(fs)
+
+	c.Database.RegisterFlags(fs)
 
 	fs.DurationVar(
 		&c.GracePeriod,

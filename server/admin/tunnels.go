@@ -36,10 +36,17 @@ func (s *Server) CreateTunnel(c *gin.Context) {
 				"error":   "Endpoint already has a tunnel",
 			})
 			return
+		} else if errors.Is(err, dbmanager.ErrDbDisabled) {
+			c.JSON(503, gin.H{
+				"message": "API is not available",
+				"error":   "Database is not enabled",
+			})
+			return
 		}
 
 		c.JSON(500, gin.H{
 			"message": "Failed to create tunnel",
+			"error":   "Unknown error",
 		})
 		return
 	}
@@ -68,9 +75,16 @@ func (s *Server) GetTunnel(c *gin.Context) {
 				"error":   "Tunnel not found",
 			})
 			return
+		} else if errors.Is(err, dbmanager.ErrDbDisabled) {
+			c.JSON(503, gin.H{
+				"message": "API is not available",
+				"error":   "Database is not enabled",
+			})
+			return
 		}
 		c.JSON(500, gin.H{
 			"message": "Failed to retrieve tunnel",
+			"error":   "Unknown error",
 		})
 		return
 	}

@@ -72,7 +72,7 @@ func NewServer(conf *config.Config, logger log.Logger) (*Server, error) {
 
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(collectors.NewGoCollector())
-	dbManager := dbmanager.NewDBManager()
+	dbManager := dbmanager.NewDBManager(&conf.Database, logger)
 
 	s := &Server{
 		fatalCh:   make(chan struct{}),

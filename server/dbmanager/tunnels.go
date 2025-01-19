@@ -1,18 +1,19 @@
 package dbmanager
 
-import "gorm.io/gorm"
-
 type TunnelManager struct {
-	orm *gorm.DB
+	DBRepository
 }
 
-func NewTunnelManager(orm *gorm.DB) *TunnelManager {
+func NewTunnelManager(repo DBRepository) *TunnelManager {
 	return &TunnelManager{
-		orm: orm,
+		DBRepository: repo,
 	}
 }
 
 func (t *TunnelManager) CreateTunnel(name, endpointID string) (*Tunnel, error) {
+	if err := t.AssertEnabled(); err != nil {
+		return nil, err
+	}
 	tunnel := Tunnel{
 		Name:       name,
 		EndpointID: endpointID,
@@ -27,6 +28,9 @@ func (t *TunnelManager) CreateTunnel(name, endpointID string) (*Tunnel, error) {
 }
 
 func (t *TunnelManager) GetTunnel(id string) (*Tunnel, error) {
+	if err := t.AssertEnabled(); err != nil {
+		return nil, err
+	}
 	var tunnel Tunnel
 	err := t.orm.First(&tunnel, "id = ?", id).Error
 	if err != nil {
@@ -36,6 +40,11 @@ func (t *TunnelManager) GetTunnel(id string) (*Tunnel, error) {
 }
 
 func (t *TunnelManager) GetTunnelFromEndpointID(endpointID string) (*Tunnel, error) {
+	if err := t.AssertEnabled(); err != nil {
+		return &Tunnel{
+			EndpointID: endpointID,
+		}, nil
+	}
 	var tunnel Tunnel
 	err := t.orm.Where("endpoint_id = ?", endpointID).First(&tunnel).Error
 	if err != nil {

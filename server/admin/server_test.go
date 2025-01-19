@@ -19,6 +19,7 @@ import (
 	"github.com/andydunstall/piko/pkg/log"
 	"github.com/andydunstall/piko/pkg/testutil"
 	"github.com/andydunstall/piko/server/cluster"
+	"github.com/andydunstall/piko/server/dbmanager"
 	"github.com/andydunstall/piko/server/status"
 )
 
@@ -45,6 +46,10 @@ func (v *fakeVerifier) Verify(token string) (*auth.Token, error) {
 
 var _ auth.Verifier = &fakeVerifier{}
 
+var apiAuthConfigNoAuth = auth.APIConfig{
+	Token: "",
+}
+
 func TestServer_AdminRoutes(t *testing.T) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
@@ -55,6 +60,8 @@ func TestServer_AdminRoutes(t *testing.T) {
 		nil,
 		nil,
 		log.NewNopLogger(),
+		dbmanager.NewInMemoryDbManager(),
+		apiAuthConfigNoAuth,
 	)
 	go func() {
 		require.NoError(t, s.Serve(ln))
@@ -123,6 +130,8 @@ func TestServer_StatusRoutes(t *testing.T) {
 		nil,
 		nil,
 		log.NewNopLogger(),
+		dbmanager.NewInMemoryDbManager(),
+		apiAuthConfigNoAuth,
 	)
 	s.AddStatus("/mystatus", &fakeStatus{})
 
@@ -172,6 +181,8 @@ func TestServer_Forward(t *testing.T) {
 		nil,
 		nil,
 		log.NewNopLogger(),
+		dbmanager.NewInMemoryDbManager(),
+		apiAuthConfigNoAuth,
 	)
 	// Note only node 1 registers the status route.
 	s1.AddStatus("/mystatus", &fakeStatus{})
@@ -199,6 +210,8 @@ func TestServer_Forward(t *testing.T) {
 		nil,
 		nil,
 		log.NewNopLogger(),
+		dbmanager.NewInMemoryDbManager(),
+		apiAuthConfigNoAuth,
 	)
 
 	go func() {
@@ -250,6 +263,8 @@ func TestServer_Authentication(t *testing.T) {
 			verifier,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
+			apiAuthConfigNoAuth,
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -285,6 +300,8 @@ func TestServer_Authentication(t *testing.T) {
 			verifier,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
+			apiAuthConfigNoAuth,
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -320,6 +337,8 @@ func TestServer_TLS(t *testing.T) {
 		nil,
 		tlsConfig,
 		log.NewNopLogger(),
+		dbmanager.NewInMemoryDbManager(),
+		apiAuthConfigNoAuth,
 	)
 	go func() {
 		require.NoError(t, s.Serve(ln))

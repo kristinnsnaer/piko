@@ -21,6 +21,7 @@ import (
 	"github.com/andydunstall/piko/pkg/log"
 	"github.com/andydunstall/piko/pkg/websocket"
 	"github.com/andydunstall/piko/server/config"
+	"github.com/andydunstall/piko/server/dbmanager"
 	"github.com/andydunstall/piko/server/upstream"
 )
 
@@ -128,6 +129,7 @@ func TestServer_HTTP(t *testing.T) {
 			nil,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -183,6 +185,7 @@ func TestServer_HTTP(t *testing.T) {
 			nil,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -226,6 +229,7 @@ func TestServer_HTTP(t *testing.T) {
 			nil,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -267,6 +271,7 @@ func TestServer_HTTP(t *testing.T) {
 			nil,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -302,6 +307,7 @@ func TestServer_HTTP(t *testing.T) {
 			nil,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -348,6 +354,7 @@ func TestServer_TCP(t *testing.T) {
 			nil,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 
 		ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -394,6 +401,7 @@ func TestServer_TCP(t *testing.T) {
 			nil,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 
 		ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -458,6 +466,7 @@ func TestServer_Authentication(t *testing.T) {
 			verifier,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -504,6 +513,7 @@ func TestServer_Authentication(t *testing.T) {
 			verifier,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -571,6 +581,7 @@ func TestServer_Authentication(t *testing.T) {
 			verifier,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))
@@ -614,6 +625,7 @@ func TestServer_Authentication(t *testing.T) {
 			verifier,
 			nil,
 			log.NewNopLogger(),
+			dbmanager.NewInMemoryDbManager(),
 		)
 		go func() {
 			require.NoError(t, s.Serve(ln))

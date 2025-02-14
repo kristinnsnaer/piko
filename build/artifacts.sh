@@ -12,6 +12,10 @@ declare -a arr=(
 	"darwin/arm64"
 	"windows/amd64"
 )
+declare -a marr=(
+	"server"
+	"client"
+)
 
 mkdir -p bin/artifacts
 
@@ -20,8 +24,11 @@ do
 	GOOSARCH=$i
 	GOOS=${GOOSARCH%/*}
 	GOARCH=${GOOSARCH#*/}
-	BINARY_NAME=piko-$GOOS-$GOARCH
+	for j in "${marr[@]}"
+	do
+		BINARY_NAME=piko-$GOOS-$GOARCH-$j
 
-	echo "Building $BINARY_NAME $VERSION..."
-	GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-X github.com/andydunstall/piko/pkg/build.Version=$VERSION" -o bin/artifacts/$BINARY_NAME main.go
+		echo "Building $BINARY_NAME $VERSION..."
+		GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-X github.com/andydunstall/piko/pkg/build.Version=$VERSION -X github.com/andydunstall/piko/pkg/build.Module=$j" -o bin/artifacts/$BINARY_NAME main.go
+	done
 done

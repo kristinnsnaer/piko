@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"strings"
+
 	"github.com/spf13/cobra"
 
 	"github.com/andydunstall/piko/cli/agent"
@@ -12,15 +14,18 @@ import (
 )
 
 func NewCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:          "piko [command] (flags)",
-		SilenceUsage: true,
-		CompletionOptions: cobra.CompletionOptions{
-			DisableDefaultCmd: true,
-		},
-		Long: `Piko is a reverse proxy that allows you to expose an endpoint
-that isn’t publicly routable (known as tunnelling).
+	buildModules := build.Module
+	shouldBuildServer := buildModules == "server" || buildModules == "all"
+	shouldBuildClient := buildModules == "client" || buildModules == "all"
 
+	var commandDescriptionBuilder strings.Builder
+
+	commandDescriptionBuilder.WriteString(`
+	AMP Ingress is a reverse proxy that allows you to 
+	expose an endpoint that isn't publicly routable to AmpID service.`)
+
+	if shouldBuildServer {
+		commandDescriptionBuilder.WriteString(`
 The Piko server is responsible for routing incoming proxy requests to upstream
 services. Upstream services open outbound-connections to the server and
 register endpoints. Piko will then route incoming requests to the appropriate
@@ -35,37 +40,52 @@ Start a server node with:
 You can also inspect the status of the server using:
 
   $ piko server status
+		`)
+	}
 
-To register an upstream service, use the Piko agent. The agent is a lightweight
-proxy that runs alongside your services. It connects to the Piko server,
+	if shouldBuildClient {
+		commandDescriptionBuilder.WriteString(`
+To register an upstream service, use the Ingress agent. The agent is a lightweight
+proxy that runs alongside your services. It connects to the AMP Ingress server,
 registers the configured endpoints, then forwards incoming requests to your
 services.
 
 Such as to register endpoint 'my-endpoint' to forward HTTP requests to your
 service at 'localhost:3000':
 
-  $ piko agent http my-endpoint 3000
+  $ amp_ingress agent http my-endpoint 3000
 
 You can also forward raw TCP using:
 
-  $ piko agent tcp my-endpoint 3000
+  $ amp_ingress agent tcp my-endpoint 3000
 
-To forward a local TCP port to an upstream endpoint, use 'piko forward'.
+To forward a local TCP port to an upstream endpoint, use 'amp_ingress forward'.
 This listens for TCP connections on the configured local port and forwards them
-to an upstream listener via Piko. Such as to forward port 3000 to endpoint
+to an upstream listener via AMP. Such as to forward port 3000 to endpoint
 'my-endpoint':
 
-  $ piko forward tcp 3000 my-endpoint
+  $ amp_ingress forward tcp 3000 my-endpoint`)
+	}
 
-`,
+	cmd := &cobra.Command{
+		Use:          "amp_ingress [command] (flags)",
+		SilenceUsage: true,
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd: true,
+		},
+		Long:    commandDescriptionBuilder.String(),
 		Version: build.Version,
 	}
 
-	cmd.AddCommand(server.NewCommand())
-	cmd.AddCommand(agent.NewCommand())
-	cmd.AddCommand(forward.NewCommand())
-	cmd.AddCommand(bench.NewCommand())
-	cmd.AddCommand(test.NewCommand())
+	if shouldBuildServer {
+		cmd.AddCommand(server.NewCommand())
+		cmd.AddCommand(bench.NewCommand())
+		cmd.AddCommand(test.NewCommand())
+	}
+	if shouldBuildClient {
+		cmd.AddCommand(agent.NewCommand())
+		cmd.AddCommand(forward.NewCommand())
+	}
 
 	return cmd
 }

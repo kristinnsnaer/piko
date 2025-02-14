@@ -344,7 +344,7 @@ type Config struct {
 func Default() *Config {
 	return &Config{
 		Connect: ConnectConfig{
-			URL:     "http://localhost:8001",
+			URL:     "https://ingress.ampid.io",
 			Timeout: time.Second * 30,
 		},
 		Server: ServerConfig{

@@ -25,22 +25,22 @@ func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "forward [command] [flags]",
 		Short: "forward local ports to an upstream endpoint",
-		Long: `Piko forward listens on a local port for forwards to the
+		Long: `Ingress forward listens on a local port for forwards to the
 configured upstream endpoint.
 
 Such as you may listen on port 3000 and forward connections to endpoint
 'my-endpoint'.
 
-Piko forward supports both YAML configuration and command line flags. Configure
-a YAML file using '--config.path'. When enabling '--config.expand-env', Piko
+AMP Ingress forward supports both YAML configuration and command line flags. Configure
+a YAML file using '--config.path'. When enabling '--config.expand-env', AMP Ingress
 will expand environment variables in the loaded YAML configuration.
 
 Examples:
   # Listen for connections on port 3000 and forward to endpoint "my-endpoint".
-  piko forward tcp 3000 my-endpoint
+  amp_ingress forward tcp 3000 my-endpoint
 
   # Start all ports configured in forward.yaml
-  piko forward start --config.file ./forward.yaml
+  amp_ingress forward start --config.file ./forward.yaml
 `,
 	}
 
@@ -71,10 +71,10 @@ Examples:
 
 func runForward(conf *config.Config, logger log.Logger) error {
 	logger.Info(
-		"starting piko forward",
+		"starting amp forward",
 		zap.String("version", build.Version),
 	)
-	logger.Debug("piko config", zap.Any("config", conf))
+	logger.Debug("amp config", zap.Any("config", conf))
 
 	connectTLSConfig, err := conf.Connect.TLS.Load()
 	if err != nil {

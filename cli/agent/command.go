@@ -28,38 +28,38 @@ func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "agent [command] [flags]",
 		Short: "register endpoints and forward requests to your upstream services",
-		Long: `The Piko agent registers endpoints with Piko, then listens
+		Long: `The Ingress agent registers endpoints with AMP Ingress, then listens
 for connections on those endpoints and forwards them to your upstream services.
 
 Such as you may listen on endpoint 'my-endpoint' and forward connections to
 your service at 'localhost:3000'.
 
-The agent opens an outbound connection to the Piko server for each listener,
-then incoming connections from Piko are multiplexed over that outbound
+The agent opens an outbound connection to the AMP Ingress server for each listener,
+then incoming connections from AMP are multiplexed over that outbound
 connection. Therefore the agent never exposes a port.
 
-If there are multiple listeners for the same endpoint, Piko load balances
+If there are multiple listeners for the same endpoint, AMP Ingress load balances
 requests the registered listeners.
 
-Piko supports HTTP and TCP listeners. HTTP listeners parse and log each request
+AMP Ingress supports HTTP and TCP listeners. HTTP listeners parse and log each request
 before forwarding it to the upstream, whereas TCP listeners forward raw
 connections.
 
 The agent supports both YAML configuration and command line flags. Configure
-a YAML file using '--config.path'. When enabling '--config.expand-env', Piko
+a YAML file using '--config.path'. When enabling '--config.expand-env', AMP Ingress
 will expand environment variables in the loaded YAML configuration.
 
 Examples:
   # Listen for HTTP requests from endpoint 'my-endpoint' and forward to
   # localhost:3000.
-  piko agent http my-endpoint 3000
+  amp_ingress agent http my-endpoint 3000
 
   # Listen for TCP connections from endpoint 'my-endpoint' and forward to
   # localhost:3000.
-  piko agent tcp my-endpoint 3000
+  amp_ingress agent tcp my-endpoint 3000
 
   # Start all listeners configured in agent.yaml.
-  piko agent start --config.file ./agent.yaml
+  amp_ingress agent start --config.file ./agent.yaml
 `,
 	}
 
@@ -98,10 +98,10 @@ Examples:
 
 func runAgent(conf *config.Config, logger log.Logger) error {
 	logger.Info(
-		"starting piko agent",
+		"starting ingress agent",
 		zap.String("version", build.Version),
 	)
-	logger.Debug("piko config", zap.Any("config", conf))
+	logger.Debug("ingress config", zap.Any("config", conf))
 
 	connectTLSConfig, err := conf.Connect.TLS.Load()
 	if err != nil {

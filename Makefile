@@ -1,5 +1,16 @@
 IMAGE_TAG ?= $(shell git rev-parse HEAD)
 VERSION ?= $(shell git describe)
+MODULE ?= all
+
+ifeq ($(MODULE),server)
+  OUTPUT = amp_ingress-server
+else ifeq ($(MODULE),client)
+  OUTPUT = amp_ingress
+else
+  # Default (covers "all" or anything else)
+  OUTPUT = amp_ingress-full
+endif
+
 
 .PHONY: all
 all: piko
@@ -7,7 +18,7 @@ all: piko
 .PHONY: piko
 piko:
 	mkdir -p bin
-	go build -ldflags="-X github.com/andydunstall/piko/pkg/build.Version=$(VERSION)" -o bin/piko main.go
+	go build -ldflags="-s -w -X github.com/andydunstall/piko/pkg/build.Version=$(VERSION) -X github.com/andydunstall/piko/pkg/build.Module=$(MODULE)" -o bin/$(OUTPUT) main.go
 
 .PHONY: inline-test
 inline-test:

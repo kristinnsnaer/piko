@@ -48,7 +48,7 @@ func TestUpstream_Auth(t *testing.T) {
 			},
 			Token: tokenString,
 		}
-		ln, err := upstream.Listen(context.TODO(), "my-endpoint")
+		ln, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.NoError(t, err)
 		defer ln.Close()
 	})
@@ -74,7 +74,7 @@ func TestUpstream_Auth(t *testing.T) {
 			},
 			Token: tokenString,
 		}
-		_, err = upstream.Listen(context.TODO(), "my-endpoint")
+		_, err = upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.ErrorContains(t, err, "connect: 401: invalid token")
 	})
 
@@ -92,7 +92,7 @@ func TestUpstream_Auth(t *testing.T) {
 				Host:   node.UpstreamAddr(),
 			},
 		}
-		_, err := upstream.Listen(context.TODO(), "my-endpoint")
+		_, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.ErrorContains(t, err, "connect: 401: missing authorization")
 	})
 }

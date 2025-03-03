@@ -51,7 +51,7 @@ func TestUpstream_ListenAndForward(t *testing.T) {
 	}
 
 	forwarder, err := upstream.ListenAndForward(
-		context.Background(), "my-endpoint", server.Listener.Addr().String(),
+		context.Background(), "my-endpoint", "", server.Listener.Addr().String(),
 	)
 	assert.NoError(t, err)
 

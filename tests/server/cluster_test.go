@@ -43,7 +43,7 @@ func TestCluster_Proxy(t *testing.T) {
 				Host:   manager.Nodes()[0].UpstreamAddr(),
 			},
 		}
-		ln, err := upstream.Listen(context.TODO(), "my-endpoint")
+		ln, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.NoError(t, err)
 
 		server := httptest.NewUnstartedServer(http.HandlerFunc(
@@ -101,7 +101,7 @@ func TestCluster_Proxy(t *testing.T) {
 				Host:   manager.Nodes()[1].ProxyAddr(),
 			},
 		}
-		ln, err := upstream.Listen(context.TODO(), "my-endpoint")
+		ln, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.NoError(t, err)
 
 		// Wait for node 2 to learn about the new upstream.

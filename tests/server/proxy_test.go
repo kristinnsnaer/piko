@@ -46,7 +46,7 @@ func TestProxy_HTTP(t *testing.T) {
 				Host:   node.UpstreamAddr(),
 			},
 		}
-		ln, err := upstream.Listen(context.TODO(), "my-endpoint")
+		ln, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.NoError(t, err)
 
 		server := httptest.NewUnstartedServer(http.HandlerFunc(
@@ -105,7 +105,7 @@ func TestProxy_HTTP(t *testing.T) {
 			},
 			TLSConfig: clientTLSConfig,
 		}
-		ln, err := upstream.Listen(context.TODO(), "my-endpoint")
+		ln, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.NoError(t, err)
 
 		server := httptest.NewUnstartedServer(http.HandlerFunc(
@@ -164,7 +164,7 @@ func TestProxy_HTTP(t *testing.T) {
 				Host:   node.UpstreamAddr(),
 			},
 		}
-		ln, err := upstream.Listen(context.TODO(), "my-endpoint")
+		ln, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.NoError(t, err)
 
 		server := httptest.NewUnstartedServer(http.HandlerFunc(
@@ -240,7 +240,7 @@ func TestProxy_TCP(t *testing.T) {
 				Host:   node.UpstreamAddr(),
 			},
 		}
-		ln, err := upstream.Listen(context.TODO(), "my-endpoint")
+		ln, err := upstream.Listen(context.TODO(), "my-endpoint", "")
 		assert.NoError(t, err)
 
 		var wg sync.WaitGroup

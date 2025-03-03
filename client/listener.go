@@ -34,6 +34,7 @@ type Listener interface {
 
 type listener struct {
 	endpointID string
+	Token      string
 
 	upstream *Upstream
 
@@ -106,7 +107,7 @@ func (l *listener) EndpointID() string {
 //
 // The endpoint ID and token are included in the initial request.
 func (l *listener) connect(ctx context.Context) error {
-	sess, err := l.upstream.connect(ctx, l.endpointID)
+	sess, err := l.upstream.connect(ctx, l.endpointID, l.Token)
 	if err != nil {
 		return err
 	}

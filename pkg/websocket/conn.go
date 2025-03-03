@@ -48,8 +48,9 @@ func (e *RetryableError) Error() string {
 }
 
 type dialOptions struct {
-	token     string
-	tlsConfig *tls.Config
+	token         string
+	upstreamToken string
+	tlsConfig     *tls.Config
 }
 
 type DialOption interface {
@@ -62,8 +63,18 @@ func (o tokenOption) apply(opts *dialOptions) {
 	opts.token = string(o)
 }
 
+type upstreamTokenOption string
+
+func (o upstreamTokenOption) apply(opts *dialOptions) {
+	opts.upstreamToken = string(o)
+}
+
 func WithToken(token string) DialOption {
 	return tokenOption(token)
+}
+
+func WithUpstreamToken(token string) DialOption {
+	return upstreamTokenOption(token)
 }
 
 type tlsConfigOption struct {
@@ -111,8 +122,10 @@ func Dial(ctx context.Context, url string, opts ...DialOption) (*Conn, error) {
 
 	header := make(http.Header)
 	if options.token != "" {
-		header.Set("x-upstream-token", options.token)
 		header.Set("Authorization", "Bearer "+options.token)
+	}
+	if options.upstreamToken != "" {
+		header.Set("x-upstream-token", options.token)
 	}
 
 	wsConn, resp, err := dialer.DialContext(

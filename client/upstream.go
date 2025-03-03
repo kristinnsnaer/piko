@@ -86,7 +86,7 @@ func (u *Upstream) ListenAndForward(
 	return newForwarder(ctx, ln, addr, u.logger()), nil
 }
 
-func (u *Upstream) connect(ctx context.Context, endpointID string) (*yamux.Session, error) {
+func (u *Upstream) connect(ctx context.Context, endpointID, token string) (*yamux.Session, error) {
 	minReconnectBackoff := u.MinReconnectBackoff
 	if minReconnectBackoff == 0 {
 		minReconnectBackoff = time.Millisecond * 100
@@ -109,6 +109,7 @@ func (u *Upstream) connect(ctx context.Context, endpointID string) (*yamux.Sessi
 		conn, err := websocket.Dial(
 			ctx,
 			url,
+			websocket.WithUpstreamToken(token),
 			websocket.WithToken(u.Token),
 			websocket.WithTLSConfig(u.TLSConfig),
 		)

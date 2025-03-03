@@ -100,8 +100,8 @@ func (u *Upstream) connect(ctx context.Context, endpointID, token string) (*yamu
 	for {
 		url := u.listenURL(endpointID)
 
-		u.logger().Debug(
-			"connecting",
+		u.logger().Info(
+			fmt.Sprintf("Connecting to endpoint %s", endpointID),
 			zap.String("endpoint-id", endpointID),
 			zap.String("url", url),
 		)
@@ -114,8 +114,8 @@ func (u *Upstream) connect(ctx context.Context, endpointID, token string) (*yamu
 			websocket.WithTLSConfig(u.TLSConfig),
 		)
 		if err == nil {
-			u.logger().Debug(
-				"connected",
+			u.logger().Info(
+				fmt.Sprintf("Connected to endpoint %s", endpointID),
 				zap.String("endpoint-id", endpointID),
 				zap.String("url", url),
 			)
@@ -139,7 +139,7 @@ func (u *Upstream) connect(ctx context.Context, endpointID, token string) (*yamu
 		var retryableError *websocket.RetryableError
 		if !errors.As(err, &retryableError) {
 			u.logger().Error(
-				"connect failed; non-retryable",
+				fmt.Sprintf("Connection to %s failed; not retrying", endpointID),
 				zap.String("endpoint-id", endpointID),
 				zap.String("url", url),
 				zap.Error(err),
@@ -149,7 +149,7 @@ func (u *Upstream) connect(ctx context.Context, endpointID, token string) (*yamu
 
 		backoff, _ := backoff.Backoff()
 		u.logger().Warn(
-			"connect failed; retrying",
+			fmt.Sprintf("Lost connection to endpoint %s; Reconnecting", endpointID),
 			zap.String("endpoint-id", endpointID),
 			zap.String("url", url),
 			zap.String("backoff", backoff.String()),

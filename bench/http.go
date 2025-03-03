@@ -119,7 +119,7 @@ func newHTTPUpstream(endpointID string, conf *config.Config, logger log.Logger) 
 	)
 	defer connectCancel()
 
-	ln, err := upstream.Listen(connectCtx, endpointID)
+	ln, err := upstream.Listen(connectCtx, endpointID, "")
 	if err != nil {
 		return nil, fmt.Errorf("listen: %w", err)
 	}

@@ -50,10 +50,11 @@ type listener struct {
 	logger Logger
 }
 
-func newListener(endpointID string, upstream *Upstream, logger Logger) *listener {
+func newListener(endpointID, token string, upstream *Upstream, logger Logger) *listener {
 	closeCtx, closeCancel := context.WithCancel(context.Background())
 	return &listener{
 		endpointID:  endpointID,
+		Token:       token,
 		upstream:    upstream,
 		closeCtx:    closeCtx,
 		closeCancel: closeCancel,

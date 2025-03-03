@@ -15,7 +15,7 @@ func ExampleUpstream_Listen() {
 		// ...
 	}
 
-	ln, err := upstream.Listen(context.Background(), "my-endpoint")
+	ln, err := upstream.Listen(context.Background(), "my-endpoint", "")
 	if err != nil {
 		panic("listen: " + err.Error())
 	}
@@ -38,7 +38,7 @@ func ExampleUpstream_ListenAndForward() {
 	}
 
 	forwarder, err := upstream.ListenAndForward(
-		context.Background(), "my-endpoint", "localhost:6000",
+		context.Background(), "my-endpoint", "", "localhost:6000",
 	)
 	if err != nil {
 		panic("listen: " + err.Error())

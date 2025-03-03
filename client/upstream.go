@@ -61,8 +61,8 @@ type Upstream struct {
 }
 
 // Listen listens for connections on the given endpoint.
-func (u *Upstream) Listen(ctx context.Context, endpointID string) (Listener, error) {
-	ln := newListener(endpointID, u, u.logger())
+func (u *Upstream) Listen(ctx context.Context, endpointID, token string) (Listener, error) {
+	ln := newListener(endpointID, token, u, u.logger())
 	if err := ln.connect(ctx); err != nil {
 		return nil, fmt.Errorf("connect: %w", err)
 	}
@@ -77,9 +77,9 @@ func (u *Upstream) Listen(ctx context.Context, endpointID string) (Listener, err
 // run in the background until either the context is canclled or the returned
 // forwarder is closed.
 func (u *Upstream) ListenAndForward(
-	ctx context.Context, endpointID string, addr string,
+	ctx context.Context, endpointID, token, addr string,
 ) (*Forwarder, error) {
-	ln := newListener(endpointID, u, u.logger())
+	ln := newListener(endpointID, token, u, u.logger())
 	if err := ln.connect(ctx); err != nil {
 		return nil, fmt.Errorf("connect: %w", err)
 	}

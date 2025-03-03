@@ -29,6 +29,8 @@ type ListenerConfig struct {
 	// Addr is the address of the upstream service to forward to.
 	Addr string `json:"addr" yaml:"addr"`
 
+	Token string `json:"token" yaml:"token"`
+
 	// Protocol is the protocol to listen on. Supports "http" and "tcp".
 	// Defaults to "http".
 	Protocol ListenerProtocol `json:"protocol" yaml:"protocol"`

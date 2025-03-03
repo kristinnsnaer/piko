@@ -131,7 +131,7 @@ func runAgent(conf *config.Config, logger log.Logger) error {
 		)
 		defer connectCancel()
 
-		ln, err := upstream.Listen(connectCtx, listenerConfig.EndpointID)
+		ln, err := upstream.Listen(connectCtx, listenerConfig.EndpointID, listenerConfig.Token)
 		if err != nil {
 			return fmt.Errorf("listen: %s: %w", listenerConfig.EndpointID, err)
 		}
